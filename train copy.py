@@ -12,19 +12,18 @@ import numpy as np
 # 데이터 전처리
 data_transforms = {
     'train': transforms.Compose([
-        transforms.RandomResizedCrop(224),
+        transforms.RandomResizedCrop(128),  # 크기를 128x128로 변경
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        transforms.Resize(128),  # 크기를 128x128로 변경
+        transforms.CenterCrop(128),  # 크기를 128x128로 변경
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
 }
-
 # 데이터 로드
 data_dir = '01.데이터'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
@@ -35,9 +34,9 @@ class_names = image_datasets['train'].classes
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # 모델 정의
-model_ft = models.resnet34(pretrained=True)
-num_ftrs = model_ft.fc.in_features
-model_ft.fc = nn.Linear(num_ftrs, 5)  # 5는 분류하려는 클래스 수입니다.
+model_ft = models.mobilenet_v2(pretrained=True)  # MobileNetV2 사용
+num_ftrs = model_ft.classifier[1].in_features  # MobileNetV2의 classifier 부분을 수정
+model_ft.classifier[1] = nn.Linear(num_ftrs, 5)  # 5는 분류하려는 클래스 수입니다.
 model_ft = model_ft.to(device)
 
 # 손실 함수, 옵티마이저, 스케줄러 정의
